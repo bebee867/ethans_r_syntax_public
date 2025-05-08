@@ -1,0 +1,125 @@
+library(readr)
+VST_ADHD_CLEAN <- read_csv("VST_ADHD_CLEAN.csv")
+
+### Packages for plotting ### 
+library(ggpubr)
+library(ggplot2)
+
+# Mean QIDS Score #
+meanQIDS <- mean(VST_ADHD_CLEAN$scoreQIDS_TRANS)
+sdQIDS <- sd(VST_ADHD_CLEAN$scoreQIDS_TRANS)
+
+# Mean ASRS v1.2 Score #
+meanASRS <- mean(VST_ADHD_CLEAN$scoreASRS)
+sdASRS <- sd(VST_ADHD_CLEAN$scoreASRS)
+
+# Mean VST Response Ratios #
+meanVST_PosRatio <- mean(VST_ADHD_CLEAN$vstPos_ratio)
+sdVST_Pos<- sd(VST_ADHD_CLEAN$vstPos_ratio)
+
+meanVST_NegRatio <- mean(VST_ADHD_CLEAN$vstNeg_ratio)
+sdVST_Neg <- sd(VST_ADHD_CLEAN$vstNeg_ratio)
+
+meanVST_NeutRatio <- mean(VST_ADHD_CLEAN$vstNeut_ratio)
+sdVST_Neut <- sd(VST_ADHD_CLEAN$vstNeut_ratio)
+
+# Mean FHS Score #
+meanFHS <- mean(VST_ADHD_CLEAN$scoreFHS)
+sdFHS <- sd(VST_ADHD_CLEAN$scoreFHS)
+
+# Means Table #
+Measure <- c("QIDS-SR", "ASRS", "VST Pos. Ratio", "VST Neg. Ratio", "VST Neut. Ratio", "FHS")
+Value <- c(meanQIDS, meanASRS, meanVST_PosRatio, meanVST_NegRatio, meanVST_NeutRatio, meanFHS)
+sd <- c(sdQIDS, sdASRS, sdVST_Pos, sdVST_Neg, sdVST_Neut, sdFHS)
+meansTable <- data.frame(Measure, Value, sd)
+print(meansTable)
+
+####################################################################################################
+
+# Normality testing prior to correlation analyses #
+
+scoreFHS <- (VST_ADHD_CLEAN$scoreFHS)
+shapiro.test(scoreFHS)
+hist(scoreFHS, main="FHS Score Distribution")
+ggqqplot(scoreFHS, title="Q-Q Plot, FHS Scores")
+
+vstPos_ratio <- (VST_ADHD_CLEAN$vstPos_ratio)
+shapiro.test(vstPos_ratio)
+hist(vstPos_ratio,  main="Distribution of Pos. VST Response Ratios")
+ggqqplot(vstPos_ratio, title="Q-Q Plot,  Pos. VST Response Ratios")
+
+vstNeg_ratio <- (VST_ADHD_CLEAN$vstNeg_ratio)
+shapiro.test(vstNeg_ratio)
+hist(vstNeg_ratio, main="Distribution of Neg. VST Response Ratios")
+ggqqplot(vstNeg_ratio, title="Q-Q Plot, Neg. VST Response Ratios")
+
+vstNeut_ratio <- (VST_ADHD_CLEAN$vstNeut_ratio)
+shapiro.test(vstNeut_ratio)
+hist(vstNeut_ratio, main="Distribution of Neut. VST Response Ratios")
+ggqqplot(vstNeut_ratio, title="Q-Q Plot, Neut. Response Ratios")
+
+# Correlations
+
+## Correlation (FHS x vstPos_ratio)
+cor.test(scoreFHS, vstPos_ratio, method = "spearman")
+plot(scoreFHS, vstPos_ratio, main = "FHS x vstPos_ratio", xlab="FHS Score", ylab="VST Pos. Response Ratio", pch=19)
+abline(lm(vstPos_ratio~scoreFHS), col="black")
+
+## Correlation (FHS x vstNeg_ratio)
+cor.test(scoreFHS,VST_ADHD_CLEAN$vstNeg_ratio, method = "spearman")
+plot(scoreFHS, vstNeg_ratio, main = "FHS x vstNeg_ratio", xlab="FHS Score", ylab="VST Neg. Response Ratio", pch=19)
+abline(reg = lm(vstNeg_ratio~scoreFHS), col="black")
+
+## Correlation (FHS x vstNeut_ratio)
+cor.test(scoreFHS, vstNeut_ratio, method = "spearman")
+plot(scoreFHS, vstNeut_ratio, main = "FHS x vstNeut_ratio", xlab="FHS Score", ylab="VST Neut. Response Ratio", pch=19)
+abline(reg = lm(vstNeut_ratio~scoreFHS), col="black")
+
+####################################################################################################
+
+# Moderation Analyses #
+
+## ~ RUN PROCESS SYNTAX BEFORE PROCEEDING!!! ~ ##
+
+# Moderation 1.a (x=scoreQIDS, w=ASRS, y=vstPos_Ratio)
+
+mod1a <- process(data=VST_ADHD_CLEAN, y="vstPos_ratio", x="scoreQIDS", w="scoreASRS", 
+                 center=2, model=1, intprobe=0.05, moments=1, plot=1, save=3,
+                 jn=1,
+                 progress=0)
+
+# Moderation 1.b (x=scoreQIDS, w=ASRS, y=vstNeg_ratio)
+
+mod1b <- process(data=VST_ADHD_CLEAN, y="vstNeg_ratio", x="scoreQIDS", w="scoreASRS", 
+                 center=2, model=1, intprobe=0.05, moments=1, plot=1, save=3,
+                 jn=1,
+                 progress=0)
+
+# Moderation 1.c (x=scoreQIDS, w=ASRS, y=vstNeut_ratio)
+
+mod1c <- process(data=VST_ADHD_CLEAN, y="vstNeut_ratio", x="scoreQIDS", w="scoreASRS", 
+                 center=2, model=1, intprobe=0.05, moments=1, plot=1, save=3,
+                 jn=1,
+                 progress=0)
+
+# Moderation 2.a (x=scoreFHS, w=ASRS, y=vstPos_ratio)
+
+mod2a <- process(data=VST_ADHD_CLEAN, y="vstPos_ratio", x="scoreFHS", w="scoreASRS", 
+                 center=2, model=1, intprobe=0.05, moments=1, plot=1, save=3,
+                 jn=1,
+                 progress=0)
+
+# Moderation 2.b (x=scoreFHS, w=ASRS, y=vstNeg_ratio)
+
+mod2b <- process(data=VST_ADHD_CLEAN, y="vstNeg_ratio", x="scoreFHS", w="scoreASRS", 
+                 center=2, model=1, intprobe=0.05, moments=1, plot=1, save=3,
+                 jn=1,
+                 progress=0)
+
+# Moderation 2.c (x=scoreFHS, w=ASRS, y=vstNeut_ratio)
+
+mod2c <- process(data=VST_ADHD_CLEAN, y="vstNeut_ratio", x="scoreFHS", w="scoreASRS", 
+                 center=2, model=1, intprobe=0.05, moments=1, plot=1, save=3,
+                 jn=1,
+                 progress=0)
+
